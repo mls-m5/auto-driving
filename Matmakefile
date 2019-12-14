@@ -1,0 +1,26 @@
+
+# Matmake file
+# https://github.com/mls-m5/matmake
+
+config += c++17 debug Wall
+
+flags += -Wno-unused-parameter
+
+## Main target
+main.includes +=
+    include
+    matengine/matgui/include
+    matengine/include
+
+main.src =
+    matengine/matgui/src/*.cpp
+    matengine/src/*.cpp
+    src/*.cpp
+    
+main.copy +=
+	*.png
+	levels/*.png
+
+main.libs +=  -lGL -lSDL2 -lSDL2_image
+
+main.dir += build
