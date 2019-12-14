@@ -9,8 +9,8 @@
 
 #include <string>
 #include <vector>
+#include "vec.h"
 #include "matgui/texture.h"
-
 
 class Level {
 public:
@@ -21,9 +21,15 @@ public:
 			state = static_cast<bool>(value);
 			return *this;
 		}
+
+		operator bool() {
+			return static_cast<bool>(state);
+		}
 	};
 
 	Level(std::string filename);
+
+	double traceRay(Vec origin, Vec direction);
 
 	Cell &operator()(int x, int y) {
 		return _data.at(x + y * _width);

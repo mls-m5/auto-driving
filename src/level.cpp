@@ -38,5 +38,17 @@ Level::Level(string filename): _texture(filename){
 	}
 }
 
+double Level::traceRay(Vec origin, Vec direction) {
+	double len = direction.abs();
+	direction /= len;
+	for (double i = 0; i < len; ++i) {
+		auto p = origin + direction * i;
+		if (at(p.x, p.y)) {
+			return i;
+		}
+	}
+	return len;
+}
+
 
 
