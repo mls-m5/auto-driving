@@ -18,8 +18,9 @@ using namespace Engine;
 class Car {
 public:
 	Car(Level &level): level(level), texture("car.png") {
-		pos = {100, 100};
+		pos = {163, 555};
 		rayPaint.line.color(1,1,1);
+		rayLen.resize(numRays * 2 + 1);
 	}
 	void update(double t){
 		if (Input::getKey(Keys::Up)) {
@@ -27,6 +28,12 @@ public:
 		}
 		if (Input::getKey(Keys::Down)) {
 			throttle += -.3;
+		}
+
+
+		if (autoPiloteEnabled) {
+			throttle += .3;
+			angle += autoX * .16;
 		}
 
 		throttle *= .9;
@@ -44,27 +51,45 @@ public:
 		pos += dir;
 
 		location.setTranslation(pos);
-	}
 
-	void draw() {
-		drawTextureRect(pos, angle, 20, -30, texture, DrawStyle::CenterOrigo);
+		double maxRaylength = 100;
 
-		int numRays = 20;
 		for (int i = -numRays; i <= numRays; ++i) {
 			double a = MatGui::pi / 2. / numRays * i;
 			Vec d(sin(a), cos(a));
-			Vec l = d * 100;
+			Vec l = d * maxRaylength;
 
 			Vec p2 = location * l;
 
 			auto dist = level.traceRay(pos, p2 - pos);
+			rayLen.at(i + numRays) = dist;
 
-			p2 = location * (d * dist);
+			auto value = dist - maxRaylength;
+			value *= i;
+			value /= numRays;
+//			value /= 100;
+			autoX += value / 1000.;
+		}
+		autoX = max(-1., min(1., autoX));
+	}
+
+	void draw() {
+
+		for (int i = - numRays; i <= numRays; ++i) {
+			double a = MatGui::pi / 2. / numRays * i;
+			Vec d(sin(a), cos(a));
+			auto len = rayLen.at(i + numRays);
+
+			Vec p2 = location * (d * len);
 
 			rayPaint.drawLine(pos, p2);
 		}
+
+		drawTextureRect(pos, angle, 20, -30, texture, DrawStyle::CenterOrigo);
 	}
 
+	const int numRays = 20;
+	vector <double> rayLen;
 	Vec pos;
 	Vec vel;
 	Vec dir;
@@ -74,12 +99,15 @@ public:
 	Level &level;
 	Texture texture;
 	Paint rayPaint;
+
+	bool autoPiloteEnabled = true;
+	double autoX = 0;
 };
 
 int main(int argc, char **argv) {
 	Application app(argc, argv);
 
-	Window window("auto-driving", 1000, 800);
+	Window window("Lasersköld auto-driving", 1000, 800);
 
 	window.style.fill.color(1, 0, 0);
 	window.updateStyle();
